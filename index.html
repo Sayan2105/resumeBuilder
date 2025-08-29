@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ATS-Friendly Resume Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    #container {
+      max-width: 840px;
+      margin: 32px auto;
+      background: #fff;
+      padding: 24px 24px 36px;
+      box-shadow: 0 2px 16px #0002;
+      border-radius: 12px;
+    }
+    input,
+    textarea,
+    select {
+      padding: 7px 10px;
+      margin: 7px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      color: #333;
+      font-size: 0.97rem;
+    }
+    button {
+      background: #2b6cb0;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+    .resume-preview {
+      padding: 34px;
+      background: #fff;
+      border-radius: 11px;
+      max-width: 720px;
+      margin: auto;
+      box-shadow: 0 1px 7px #0001;
+      color: var(--text-color, #343434);
+    }
+    .resume-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 12px;
+      color: var(--heading-color, #2b6cb0);
+    }
+    .resume-name {
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: inherit;
+      flex-grow: 1;
+    }
+    #profile-img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: var(--img-border-radius, 0%);
+      margin-left: 15px;
+      /* border: 2px solid var(--heading-color, #2b6cb0); */
+    }
+    .resume-links {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--heading-color, #2b6cb0);
+    }
+    .resume-links a {
+      display: flex;
+      align-items: center;
+      color: var(--heading-color, #2b6cb0);
+      text-decoration: none;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .contact-info {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--text-color, #343434);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .contact-info a {
+      color: var(--text-color, #343434);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .grey-skill {
+      background: #e2e8f0;
+      display: inline-block;
+      margin: 2px 6px 2px 0;
+      padding: 4px 11px;
+      border-radius: 12px;
+      font-size: 0.97rem;
+      color: var(--text-color, #343434);
+    }
+    .section-title {
+      font-size: 1.07rem;
+      color: var(--heading-color, #2b6cb0);
+      margin: 18px 0 7px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--heading-color, #2b6cb0);
+      padding-bottom: 2px;
+    }
+    ul {
+      margin: 0 0 15px 20px;
+    }
+    /* Form image preview */
+    #imgPreview {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid #2b6cb0;
+      border-radius: var(--img-border-radius, 0%);
+    }
+    .resume-links a img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+    /* Responsive print */
+    @media print {
+      body,
+      #container {
+        box-shadow: none;
+        background: white;
+      }
+      #container {
+        padding: 0;
+      }
+      .resume-preview {
+        padding: 18px;
+      }
+      button,
+      .form-page {
+        display: none !important;
+      }
+       .grey-skill {
+            background: #e2e8f0 !important;
+            -webkit-print-color-adjust: exact;
+          }
+          img, svg {
+            width: auto !important;
+            height: auto !important;
+          }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <form id="resumeForm" class="form-page" novalidate>
+      <h2>ATS-Friendly Resume Builder</h2>
+
+      <label for="profileImage">Profile Image (optional)</label>
+      <input type="file" id="profileImage" accept="image/*" />
+      <select id="imgStyle" aria-label="Image Shape" title="Select Image Shape" style="width:100%; margin-bottom:12px;">
+        <option value="0%">Square</option>
+        <option value="10%">Rounded Corners</option>
+        <option value="50%">Circle</option>
+      </select>
+      <img id="imgPreview" alt="Profile Preview" style="display:none" />
+
+      <label for="name">Name *</label>
+      <input id="name" type="text" placeholder="Full Name" required />
+
+      <label for="address">Address</label>
+      <input id="address" type="text" placeholder="Address" />
+
+      <label for="phone">Phone</label>
+      <input id="phone" type="tel" placeholder="+91 12345 67890" />
+
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="example@gmail.com" />
+
+      <div class="resume-links">
+        <a href="#" id="previewLinkedin" target="_blank" style="display:none;">
+          <img src="https://cdn-icons-png.flaticon.com/24/174/174857.png" alt="LinkedIn" loading="lazy" /> LinkedIn
+        </a>
+        <a href="#" id="previewGithub" target="_blank" style="display:none;">
+          <img src="https://cdn-icons-png.flaticon.com/24/733/733553.png" alt="GitHub" loading="lazy" /> GitHub
+        </a>
+        <a href="#" id="previewPortfolio" target="_blank" style="display:none;">
+          <img src="https://cdn-icons-png.flaticon.com/24/69/69524.png" alt="Portfolio" /> Portfolio
+        </a>
+      </div>
+
+      <label for="linkedin">LinkedIn URL</label>
+      <input id="linkedin" type="url" placeholder="https://linkedin.com/in/username" />
+
+      <label for="github">GitHub URL (optional)</label>
+      <input id="github" type="url" placeholder="https://github.com/username" />
+
+      <label for="portfolio">Portfolio URL (optional)</label>
+      <input id="portfolio" type="url" placeholder="https://yourportfolio.com" />
+
+      <label for="summary">Professional Summary (optional, 2-4 lines)</label>
+      <textarea id="summary" maxlength="400" placeholder="Write 2-4 lines summary here..."></textarea>
+
+      <label for="skills">Skills (comma separated)</label>
+      <input id="skills" placeholder="HTML5, CSS3, JavaScript, React, Node.js, PHP, MySQL" />
+
+      <label for="headingColor">Heading Color</label>
+      <input id="headingColor" type="color" value="#2b6cb0" />
+
+      <label for="textColor">Text Color</label>
+      <input id="textColor" type="color" value="#343434" />
+
+      <div id="education-section">
+          <label>Education (Optional, add multiple entries)</label>
+          <div id="education-list"></div>
+          <button type="button" onclick="addEducation()">+ Add Education</button>
+        </div>
+
+
+      <div id="exp-section">
+        <label>Experience</label>
+        <div id="experiences"></div>
+        <button type="button" onclick="addExperience()">+ Add Experience</button>
+      </div>
+
+      <div id="proj-section">
+        <label>Projects</label>
+        <div id="projects"></div>
+        <button type="button" onclick="addProject()">+ Add Project</button>
+      </div>
+
+      <button type="submit">Preview Resume</button>
+    </form>
+
+    <div id="resumePreview" style="display:none;"></div>
+    <button id="printBtn" onclick="window.print()" style="display:none;">
+      Download / Print
+    </button>
+    <button
+      onclick="backToForm()"
+      id="backBtn"
+      style="display:none; background: #bbb; color: #333;"
+    >
+      Edit
+    </button>
+  </div>
+
+  <script>
+    let expCount = 0,
+      projCount = 0;
+
+    const profileImageInput = document.getElementById('profileImage');
+    const imgPreview = document.getElementById('imgPreview');
+    const imgStyleSelect = document.getElementById('imgStyle');
+
+    profileImageInput.addEventListener('change', function () {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imgPreview.src = e.target.result;
+          imgPreview.style.display = 'block';
+          imgPreview.style.borderRadius = imgStyleSelect.value;
+        };
+        reader.readAsDataURL(this.files[0]);
+      } else {
+        imgPreview.style.display = 'none';
+        imgPreview.src = '';
+      }
+    });
+
+    imgStyleSelect.addEventListener('change', () => {
+      imgPreview.style.borderRadius = imgStyleSelect.value;
+    });
+
+    function addExperience() {
+      expCount++;
+      const div = document.createElement('div');
+      div.style.marginBottom = '15px';
+      div.innerHTML = `
+      <input placeholder="Job Title (use **bold** syntax)" class="exp-title" />
+      <input placeholder="Company, Period (e.g. TVS Solutions, 2023–2024)" class="exp-company" />
+      <textarea placeholder="Points, max 5 (comma separated) - use **bold** for emphasis" class="exp-points"></textarea>
+      `;
+      document.getElementById('experiences').appendChild(div);
+    }
+    
+    function addEducation(value = '') {
+          const div = document.createElement('div');
+          div.style.marginBottom = '10px';
+          div.innerHTML = `
+            <input type="text" placeholder="Degree, Institution, Year, Marks (optional, comma separated)" class="education-entry" value="${value}" />
+          `;
+          document.getElementById('education-list').appendChild(div);
+        }
+        
+
+
+    function addProject() {
+      projCount++;
+      const div = document.createElement('div');
+      div.style.marginBottom = '15px';
+      div.innerHTML = `
+      <input placeholder="Project Name (use **bold** syntax)" class="proj-name" />
+      <input placeholder="Stack (e.g. MERN, PHP)" class="proj-stack" />
+      <input placeholder="Live Project URL (optional)" class="proj-live" type="url" />
+      <input placeholder="GitHub URL (optional)" class="proj-github" type="url" />
+      <textarea placeholder="Points, max 5 (comma separated) - use **bold** for emphasis" class="proj-points"></textarea>
+      `;
+      document.getElementById('projects').appendChild(div);
+    }
+
+    // Initial fields
+    addExperience();
+    addProject();
+        addEducation();
+
+    document.getElementById('resumeForm').onsubmit = function (e) {
+      e.preventDefault();
+      buildResume();
+    };
+
+    // Replace **bold** with <strong> for HTML display
+    function parseBold(text) {
+      if (!text) return '';
+      return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function buildResume() {
+      // Colors
+      const headingColor = document.getElementById('headingColor').value || '#2b6cb0';
+      const textColor = document.getElementById('textColor').value || '#343434';
+      document.documentElement.style.setProperty('--heading-color', headingColor);
+      document.documentElement.style.setProperty('--text-color', textColor);
+
+      // Gather info
+      const name = parseBold(document.getElementById('name').value.trim());
+      const address = parseBold(document.getElementById('address').value.trim());
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const linkedin = document.getElementById('linkedin').value.trim();
+      const github = document.getElementById('github').value.trim();
+      const portfolio = document.getElementById('portfolio').value.trim();
+      const summary = parseBold(document.getElementById('summary').value.trim());
+      const skills = document
+        .getElementById('skills')
+        .value.split(',')
+        .map((s) => s.trim())
+        .filter((f) => f);
+    //   const education = parseBold(document.getElementById('education').value.trim());
+      let educationEntries = [];
+        document.querySelectorAll('.education-entry').forEach((input) => {
+          const val = input.value.trim();
+          if (val) {
+            educationEntries.push(parseBold(val));
+          }
+        });
+        const education = educationEntries.join('<br/>');  // Line break between entries
+
+
+      let experiences = [];
+      document.querySelectorAll('.exp-title').forEach((el, i) => {
+        const title = parseBold(el.value.trim());
+        const company = parseBold(document.querySelectorAll('.exp-company')[i].value.trim());
+        const points = document
+          .querySelectorAll('.exp-points')
+          [i].value.split('`')
+          .map((s) => parseBold(s.trim()))
+          .filter((f) => f);
+        if (title && company) {
+          experiences.push({ title, company, points });
+        }
+      });
+
+      let projects = [];
+      document.querySelectorAll('.proj-name').forEach((el, i) => {
+        const name = parseBold(el.value.trim());
+        const stack = document.querySelectorAll('.proj-stack')[i].value.trim();
+        const live = document.querySelectorAll('.proj-live')[i].value.trim();
+        const git = document.querySelectorAll('.proj-github')[i].value.trim();
+        const points = document
+          .querySelectorAll('.proj-points')
+          [i].value.split('`')
+          .map((s) => parseBold(s.trim()))
+          .filter((f) => f);
+        if (name && stack) {
+          projects.push({ name, stack, live, git, points });
+        }
+      });
+
+      // Profile image
+      const profileSrc = imgPreview.style.display === 'block' ? imgPreview.src : '';
+
+      // Generate links for header
+        const linksHtml = [];
+        if (phone)
+          linksHtml.push(
+            `<a href="tel:${phone}" title="Phone">
+               <img src="https://cdn-icons-png.flaticon.com/24/724/724664.png" alt="Phone" /> ${phone}
+             </a>`
+          );
+        if (email)
+          linksHtml.push(
+            `<a href="mailto:${email}" title="Email">
+               <img src="https://cdn-icons-png.flaticon.com/24/732/732200.png" alt="Email" /> ${email}
+             </a>`
+          );
+        if (linkedin)
+          linksHtml.push(
+            `<a href="${linkedin}" target="_blank" rel="noopener" title="LinkedIn">
+               <img src="https://cdn-icons-png.flaticon.com/24/174/174857.png" alt="LinkedIn" /> LinkedIn
+             </a>`
+          );
+        if (github)
+          linksHtml.push(
+            `<a href="${github}" target="_blank" rel="noopener" title="GitHub">
+               <img src="https://cdn-icons-png.flaticon.com/24/733/733553.png" alt="GitHub" /> GitHub
+             </a>`
+          );
+        if (portfolio)
+          linksHtml.push(
+            `<a href="${portfolio}" target="_blank" rel="noopener" title="Portfolio">
+               <img src="https://cdn-icons-png.flaticon.com/24/545/545682.png" alt="Portfolio" /> Portfolio
+             </a>`
+          );
+
+let html = `<div class="resume-preview" style="--heading-color:${headingColor}; --text-color:${textColor}; --img-border-radius:${imgStyleSelect.value}">
+  <div class="resume-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; color: var(--heading-color); flex-wrap:wrap;">
+    <div style="display:flex; flex-direction: column; gap:6px; flex-grow:1; min-width:0;">
+      <span class="resume-name" style="font-size:1.6em; font-weight:700; margin-bottom:0; word-break: break-word;">
+        ${name}
+      </span>
+      <div class="resume-links" style="font-size:0.9em; color: var(--text-color); display:flex; gap:12px; flex-wrap:wrap; overflow:hidden;">
+        ${linksHtml.join(' ')}
+      </div>
+    </div>
+    ${
+      profileSrc
+        ? `<img id="profile-img" src="${profileSrc}" alt="Profile Image" style="height:100px; width:100px; object-fit:cover; border-radius: var(--img-border-radius); margin-left:24px; flex-shrink:0;" />`
+        : ''
+    }
+  </div>
+
+  ${summary ? `<div class="section-title">Professional Summary</div><div>${summary}</div>` : ''}
+  <div class="section-title">Skills</div>
+  <div style="margin-bottom:13px;">${skills
+    .map((sk) => `<span class="grey-skill">${sk}</span>`)
+    .join('')}</div>
+  <div class="section-title">Experience</div>
+  ${experiences
+    .map(
+      (e) =>
+        `<div style="margin-bottom:10px;"><strong>${e.title}</strong> | <span>${e.company}</span><ul>${e.points
+          .slice(0, 5)
+          .map((p) => (p ? `<li>${p}</li>` : ''))
+          .join('')}</ul></div>`
+    )
+    .join('')}
+  <div class="section-title">Projects</div>
+  ${projects
+    .map(
+      (p) => `<div style="margin-bottom:10px;">
+        <strong>${p.name}</strong> <span style="font-size:0.96em;color:#888;">(${p.stack})</span><br/>
+        ${
+          p.live
+            ? `<a href="${p.live}" target="_blank" rel="noopener" style="text-decoration:none; color: var(--heading-color);">Live Project</a> `
+            : ''
+        }
+        ${
+          p.git
+            ? `<a href="${p.git}" target="_blank" rel="noopener" style="text-decoration:none; margin-left:8px; color: var(--heading-color);">GitHub Repo</a>`
+            : ''
+        }
+        <ul>${p.points
+          .slice(0, 5)
+          .map((pt) => (pt ? `<li>${pt}</li>` : ''))
+          .join('')}</ul>
+      </div>`
+    )
+    .join('')}
+  <div class="section-title">Education</div>
+  <div>${education}</div>
+</div>`;
+
+
+      document.getElementById('resumePreview').innerHTML = html;
+      document.getElementById('resumePreview').style.display = '';
+      document.getElementById('resumeForm').style.display = 'none';
+      document.getElementById('printBtn').style.display = '';
+      document.getElementById('backBtn').style.display = '';
+
+      // Update links preview visibility
+      document.getElementById('previewLinkedin').style.display = linkedin ? '' : 'none';
+      document.getElementById('previewGithub').style.display = github ? '' : 'none';
+      document.getElementById('previewPortfolio').style.display = portfolio ? '' : 'none';
+    }
+
+    function backToForm() {
+      document.getElementById('resumeForm').style.display = '';
+      document.getElementById('resumePreview').style.display = 'none';
+      document.getElementById('printBtn').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
