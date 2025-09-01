@@ -356,9 +356,12 @@
       const address = parseBold(document.getElementById('address').value.trim());
       const phone = document.getElementById('phone').value.trim();
       const email = document.getElementById('email').value.trim();
-      const linkedin = document.getElementById('linkedin').value.trim();
-      const github = document.getElementById('github').value.trim();
-      const portfolio = document.getElementById('portfolio').value.trim();
+      const linkedin = toAbsoluteUrl(document.getElementById('linkedin').value);
+      const github = toAbsoluteUrl(document.getElementById('github').value);
+      const portfolio = toAbsoluteUrl(document.getElementById('portfolio').value);
+      // For projects:
+      const live = toAbsoluteUrl(document.querySelectorAll('.proj-live')[i].value);
+      const git  = toAbsoluteUrl(document.querySelectorAll('.proj-github')[i].value);
       const summary = parseBold(document.getElementById('summary').value.trim());
       const skills = document
         .getElementById('skills')
@@ -513,6 +516,19 @@ let html = `<div class="resume-preview" style="--heading-color:${headingColor}; 
       document.getElementById('previewPortfolio').style.display = portfolio ? '' : 'none';
     }
 
+
+   function toAbsoluteUrl(u) {
+    if (!u) return '';
+    const url = u.trim();
+    // Already absolute (http, https, mailto, tel, etc.)
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url)) return url;
+    // Protocol-relative allowed (//example.com)
+    if (url.startsWith('//')) return url;
+    // Prepend https:// to bare domains like example.com or www.example.com
+    return 'https://' + url.replace(/^\/+/, '');
+  }
+
+    
     function backToForm() {
       document.getElementById('resumeForm').style.display = '';
       document.getElementById('resumePreview').style.display = 'none';
